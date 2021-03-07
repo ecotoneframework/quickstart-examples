@@ -8,6 +8,9 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 $rootCatalog = __DIR__;
 require $rootCatalog . "/vendor/autoload.php";
 
+// this file is required by specific examples and they do provide namespace to load
+\Ecotone\Messaging\Support\Assert::notNull($namespaceToLoad, "Namespace to load was not given before including " . __DIR__);
+
 $container = new class() implements GatewayAwareContainer {
     private Container $container;
 
@@ -36,8 +39,6 @@ $messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
     $rootCatalog,
     $container,
     ServiceConfiguration::createWithDefaults()
-        ->withLoadCatalog("src"),
+        ->withNamespaces([$namespaceToLoad]),
     []
 );
-
-// run messaging below:
