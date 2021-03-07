@@ -40,5 +40,6 @@ $messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
     $container,
     ServiceConfiguration::createWithDefaults()
         ->withNamespaces([$namespaceToLoad]),
-    []
+    [],
+    false
 );
