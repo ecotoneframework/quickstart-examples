@@ -5,9 +5,10 @@ use App\CQRS\PlaceOrder;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 
+$catalog = "CQRS";
 $namespaceToLoad = "App\CQRS";
 /** @var Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem */
-require __DIR__ . "/../../ecotone-lite.php";
+require __DIR__ . "/../ecotone-lite.php";
 
 /** @var CommandBus $commandBus */
 $commandBus = $messagingSystem->getGatewayByName(CommandBus::class);

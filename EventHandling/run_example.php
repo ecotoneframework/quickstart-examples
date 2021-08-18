@@ -3,9 +3,10 @@
 use App\EventHandling\OrderWasPlaced;
 use Ecotone\Modelling\EventBus;
 
+$catalog = "EventHandling";
 $namespaceToLoad = "App\EventHandling";
 /** @var Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem */
-require __DIR__ . "/../../ecotone-lite.php";
+require __DIR__ . "/../ecotone-lite.php";
 
 /** @var EventBus $eventBus */
 $eventBus = $messagingSystem->getGatewayByName(EventBus::class);

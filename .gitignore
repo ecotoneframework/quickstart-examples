@@ -4,3 +4,6 @@ tests/coverage
 !tests/coverage/.gitkeep
 .phpunit.result.cache
 composer.lock
+*/composer.lock
+config.json
+*/vendor

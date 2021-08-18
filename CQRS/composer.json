@@ -9,11 +9,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "App\\": "src/"
+            "App\\CQRS\\": "src"
         }
     },
     "require": {
         "ecotone/ecotone": "^1.0",
+        "ecotone/jms-converter": "^1.0",
         "php-di/php-di": "^6.3"
     },
     "require-dev": {
