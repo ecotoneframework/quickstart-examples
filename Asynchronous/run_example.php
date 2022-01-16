@@ -6,12 +6,9 @@ use Ecotone\Modelling\EventBus;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
 
 require __DIR__ . "/vendor/autoload.php";
-
-$catalog = "Asynchronous";
-$namespaceToLoad = "App\Asynchronous";
-$containerServices = [Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory("amqp://guest:guest@rabbitmq:5672/%2f")];
-/** @var Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem */
 require __DIR__ . "/../ecotone-lite.php";
+/** @var Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem */
+$messagingSystem = createMessaging([Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory("amqp://guest:guest@rabbitmq:5672/%2f")], "App\Asynchronous", "Asynchronous");;
 
 /** @var EventBus $eventBus */
 $eventBus = $messagingSystem->getGatewayByName(EventBus::class);

@@ -4,10 +4,9 @@ use App\Conversion\OrderService;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 
-$catalog = "Conversion";
-$namespaceToLoad = "App\Conversion";
-/** @var Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem */
+require __DIR__ . "/vendor/autoload.php";
 require __DIR__ . "/../ecotone-lite.php";
+$messagingSystem = createMessaging([], "App\Conversion", "Conversion");
 
 /** @var CommandBus $commandBus */
 $commandBus = $messagingSystem->getGatewayByName(CommandBus::class);

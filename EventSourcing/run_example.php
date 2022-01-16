@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 use App\EventSourcing\Command\ChangePrice;
 use App\EventSourcing\Command\RegisterProduct;
@@ -7,10 +7,10 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\Assert;
 
-$catalog = "EventSourcing";
-$namespaceToLoad = "App\EventSourcing";
-/** @var Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem */
+require __DIR__ . "/vendor/autoload.php";
 require __DIR__ . "/../ecotone-lite.php";
+$messagingSystem = createMessaging([], "App\EventSourcing", "EventSourcing");
+
 
 /** @var CommandBus $commandBus */
 $commandBus = $messagingSystem->getGatewayByName(CommandBus::class);
