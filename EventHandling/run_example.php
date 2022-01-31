@@ -1,13 +1,9 @@
 <?php
 
 use App\EventHandling\OrderWasPlaced;
-use Ecotone\Modelling\EventBus;
+use Ecotone\Lite\EcotoneLiteApplication;
 
 require __DIR__ . "/vendor/autoload.php";
-require __DIR__ . "/../ecotone-lite.php";
-$messagingSystem = createMessaging([], "App\EventHandling", "EventHandling");
+$messagingSystem = EcotoneLiteApplication::boostrap();
 
-/** @var EventBus $eventBus */
-$eventBus = $messagingSystem->getGatewayByName(EventBus::class);
-
-$eventBus->publish(new OrderWasPlaced(1, "Milk"));
+$messagingSystem->getEventBus()->publish(new OrderWasPlaced(1, "Milk"));

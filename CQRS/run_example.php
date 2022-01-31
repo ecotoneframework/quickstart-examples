@@ -2,18 +2,11 @@
 
 use App\CQRS\GetOrder;
 use App\CQRS\PlaceOrder;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\QueryBus;
+use Ecotone\Lite\EcotoneLiteApplication;
 
 require __DIR__ . "/vendor/autoload.php";
-require __DIR__ . "/../ecotone-lite.php";
-$messagingSystem = createMessaging([], "App\CQRS", "CQRS");
+$messagingSystem = EcotoneLiteApplication::boostrap();
 
-/** @var CommandBus $commandBus */
-$commandBus = $messagingSystem->getGatewayByName(CommandBus::class);
-/** @var QueryBus $queryBus */
-$queryBus = $messagingSystem->getGatewayByName(QueryBus::class);
+$messagingSystem->getCommandBus()->send(new PlaceOrder(1, "Milk"));
 
-$commandBus->send(new PlaceOrder(1, "Milk"));
-
-echo $queryBus->send(new GetOrder(1)) . "\n";
+echo $messagingSystem->getQueryBus()->send(new GetOrder(1)) . "\n";

@@ -5,5 +5,5 @@ tests/coverage
 .phpunit.result.cache
 composer.lock
 */composer.lock
-config.json
+CQRS/config.json
 */vendor
