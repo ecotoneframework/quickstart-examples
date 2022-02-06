@@ -2,23 +2,35 @@
 
 use App\Microservices\Receiver\MessagingConfiguration;
 use App\Microservices\Receiver\OrderServiceReceiver;
+use Ecotone\Lite\EcotoneLiteApplication;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\QueryBus;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
 use PHPUnit\Framework\Assert;
 
 require __DIR__ . "/vendor/autoload.php";
-require __DIR__ . "/../ecotone-lite.php";
+
 // Receiver
-$receiver = createMessaging([Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory("amqp://guest:guest@rabbitmq:5672/%2f")], "App\Microservices\Receiver", "Microservices", MessagingConfiguration::SERVICE_NAME);
+$receiver = EcotoneLiteApplication::boostrap(
+    [Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory("amqp://guest:guest@rabbitmq:5672/%2f")],
+    configuration: ServiceConfiguration::createWithDefaults()
+        ->withServiceName(MessagingConfiguration::SERVICE_NAME)
+        ->withNamespaces(["App\Microservices\Receiver"])
+        ->doNotLoadCatalog()
+);
 $receiver->run(MessagingConfiguration::SERVICE_NAME);
-/** @var QueryBus $queryBus */
-$queryBus = $receiver->getGatewayByName(QueryBus::class);
+$queryBus = $receiver->getQueryBus();
 
 // Publisher
-$publisher = createMessaging([Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory("amqp://guest:guest@rabbitmq:5672/%2f")], "App\Microservices\Publisher", "Microservices", \App\Microservices\Publisher\MessagingConfiguration::SERVICE_NAME);
-/** @var DistributedBus $distributedBus */
-$distributedBus = $publisher->getGatewayByName(DistributedBus::class);
+$publisher = EcotoneLiteApplication::boostrap(
+    [Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory("amqp://guest:guest@rabbitmq:5672/%2f")],
+    configuration: ServiceConfiguration::createWithDefaults()
+            ->withServiceName(\App\Microservices\Publisher\MessagingConfiguration::SERVICE_NAME)
+            ->withNamespaces(["App\Microservices\Publisher"])
+            ->doNotLoadCatalog()
+);
+$distributedBus = $publisher->getDistributedBus();
 
 echo "Sending command to Order Service, to order milk and bread\n";
 $distributedBus->sendCommand(
