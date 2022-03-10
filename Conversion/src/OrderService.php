@@ -15,21 +15,18 @@ class OrderService
     private array $orders;
 
     #[CommandHandler(self::PLACE_ORDER)]
-    public function placeOrder(PlaceOrder $command, Serializer $serializer) : void
+    public function placeOrder(PlaceOrder $command) : void
     {
-        $targetMediaType = MediaType::createApplicationJson()->toString();
-        var_dump($targetMediaType, $serializer->convertFromPHP($command, $targetMediaType));
-        die("test");
-        $this->orders[$command->getOrderId()] = $command->getProductName();
+        $this->orders[$command->orderId] = $command->productIds;
     }
 
     #[QueryHandler(self::GET_ORDER)]
-    public function getOrder(GetOrder $query) : string
+    public function getOrder(GetOrder $query) : array
     {
-         if (!array_key_exists($query->getOrderId(), $this->orders)) {
-             throw new \InvalidArgumentException("Order was not found " . $query->getOrderId());
+         if (!array_key_exists($query->orderId, $this->orders)) {
+             throw new \InvalidArgumentException("Order was not found " . $query->orderId);
          }
 
-         return $this->orders[$query->getOrderId()];
+         return $this->orders[$query->orderId];
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Conversion;
+namespace App\Conversion\Configuration;
 
 use Ecotone\JMSConverter\JMSConverterConfiguration;
 use Ecotone\Messaging\Attribute\ServiceContext;

@@ -2,24 +2,13 @@
 
 namespace App\Conversion;
 
+use Ramsey\Uuid\UuidInterface;
+
 class PlaceOrder
 {
-    private string $orderId;
-    private ?string $productName;
-
-    public function __construct(string $orderId, ?string $productName)
-    {
-        $this->orderId = $orderId;
-        $this->productName = $productName;
-    }
-
-    public function getOrderId(): string
-    {
-        return $this->orderId;
-    }
-
-    public function getProductName(): string
-    {
-        return $this->productName;
-    }
+    public readonly string $orderId;
+    /**
+     * @var UuidInterface[]
+     */
+    public readonly array $productIds;
 }
