@@ -11,6 +11,15 @@ services:
     command: sleep 999999
     networks:
       - default
+  database:
+    image: postgres:12.1
+    networks:
+      - default
+    environment:
+      POSTGRES_USER: "ecotone"
+      POSTGRES_PASSWORD: "secret"
+    ports:
+      - "5432:5432"
   rabbitmq:
     image: rabbitmq:3.6-management-alpine
     environment:
