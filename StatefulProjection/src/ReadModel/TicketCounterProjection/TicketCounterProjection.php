@@ -1,15 +1,12 @@
 <?php
 
-namespace App\ReadModel\WalletBalance;
+namespace App\ReadModel\TicketCounterProjection;
 
-use App\Domain\Event\MoneyWasAddedToWallet;
-use App\Domain\Event\MoneyWasSubtractedFromWallet;
 use App\Domain\Event\TicketWasRegistered;
 use App\Domain\Ticket;
 use Ecotone\EventSourcing\Attribute\Projection;
 use Ecotone\EventSourcing\Attribute\ProjectionState;
 use Ecotone\EventSourcing\EventStreamEmitter;
-use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Modelling\Attribute\EventHandler;
 
 #[Projection("ticket_counter", Ticket::class)]

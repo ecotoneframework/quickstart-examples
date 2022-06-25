@@ -2,9 +2,8 @@
 
 namespace App\ReadModel;
 
-use App\ReadModel\WalletBalance\TicketCounterWasChanged;
+use App\ReadModel\TicketCounterProjection\TicketCounterWasChanged;
 use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
 
 final class NotificationService
 {

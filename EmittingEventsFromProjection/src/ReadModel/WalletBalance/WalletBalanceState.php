@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ReadModel\WalletBalance;
+namespace App\ReadModel\TicketCounterProjection;
 
 final class WalletBalanceState
 {

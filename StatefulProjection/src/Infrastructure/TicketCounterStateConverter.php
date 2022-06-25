@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure;
 
-use App\ReadModel\WalletBalance\TicketCounterState;
+use App\ReadModel\TicketCounterProjection\TicketCounterState;
 use Ecotone\Messaging\Attribute\Converter;
 
 final class TicketCounterStateConverter

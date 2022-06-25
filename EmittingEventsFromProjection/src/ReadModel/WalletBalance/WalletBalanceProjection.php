@@ -1,6 +1,6 @@
 <?php
 
-namespace App\ReadModel\WalletBalance;
+namespace App\ReadModel\TicketCounterProjection;
 
 use App\Domain\Event\MoneyWasAddedToWallet;
 use App\Domain\Event\MoneyWasSubtractedFromWallet;
