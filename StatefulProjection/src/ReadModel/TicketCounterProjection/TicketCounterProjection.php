@@ -9,9 +9,11 @@ use Ecotone\EventSourcing\Attribute\ProjectionState;
 use Ecotone\EventSourcing\EventStreamEmitter;
 use Ecotone\Modelling\Attribute\EventHandler;
 
-#[Projection("ticket_counter", Ticket::class)]
+#[Projection(self::NAME, Ticket::class)]
 final class TicketCounterProjection
 {
+    const NAME = "ticket_counter";
+
     #[EventHandler]
     public function when(TicketWasRegistered $event, #[ProjectionState] TicketCounterState $state, EventStreamEmitter $eventStreamEmitter): TicketCounterState
     {
