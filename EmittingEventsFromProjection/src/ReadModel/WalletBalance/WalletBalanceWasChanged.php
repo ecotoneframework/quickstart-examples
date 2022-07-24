@@ -1,11 +1,11 @@
 <?php
 
-namespace App\ReadModel\TicketCounterProjection;
+namespace App\ReadModel\WalletBalance;
 
 final class WalletBalanceWasChanged
 {
     public function __construct(
-        public readonly string $walletId,
-        public readonly int $currentBalance
+        public string $walletId,
+        public int $currentBalance
     ){}
 }

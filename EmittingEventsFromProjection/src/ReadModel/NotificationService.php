@@ -2,7 +2,7 @@
 
 namespace App\ReadModel;
 
-use App\ReadModel\TicketCounterProjection\WalletBalanceWasChanged;
+use App\ReadModel\WalletBalance\WalletBalanceWasChanged;
 use Ecotone\Modelling\Attribute\EventHandler;
 
 final class NotificationService
