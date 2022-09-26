@@ -9,12 +9,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "App\\Microservices\\": "src"
+            "App\\OutboxPattern\\": "src"
         }
     },
     "require": {
         "ecotone/lite-application": "^1.0",
-        "ecotone/amqp": "^1.45",
+        "ecotone/dbal": "^1.45",
         "ecotone/jms-converter": "^1.45"
     },
     "require-dev": {
