@@ -43,10 +43,10 @@ Please verify that it's not already reported by someone else.
 
 ## Contact
 
-If you want to talk or ask question about Ecotone
+If you want to talk or ask questions about Ecotone
 
 - [**Twitter**](https://twitter.com/EcotonePHP)
-- **ecotoneframework@gmail.com**
+- **support@simplycodedsoftware.com**
 - [**Community Channel**](https://discord.gg/CctGMcrYnV)
 
 ## Support Ecotone
