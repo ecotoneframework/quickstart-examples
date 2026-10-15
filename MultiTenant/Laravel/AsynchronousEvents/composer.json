@@ -13,10 +13,9 @@
         }
     },
     "require": {
-        "ecotone/dbal": "~2.0.0-beta.2",
-        "ecotone/jms-converter": "~2.0.0-beta.2",
-        "ecotone/laravel": "~2.0.0-beta.2",
-        "ecotone/laravel-starter": "^1.1.0",
+        "ecotone/dbal": "~2.0.0-beta.3",
+        "ecotone/jms-converter": "~2.0.0-beta.3",
+        "ecotone/laravel": "~2.0.0-beta.3",
         "laravel/laravel": "^11.0"
     },
     "require-dev": {
