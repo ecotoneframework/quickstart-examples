@@ -1,21 +1,12 @@
 <?php
 
-use App\Workflow\Application\ImageProcessingWorkflow;
-use App\Workflow\Application\ImageResizer;
-use App\Workflow\Application\ImageUploader;
 use App\Workflow\Application\ProcessImage;
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\ImageManager;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . "/../boostrap.php";
 
-$messagingSystem = Workflows\bootstrapEcotone(__DIR__, [
-    new ImageProcessingWorkflow(),
-    new ImageResizer(new ImageManager(new Driver())),
-    new ImageUploader(),
-]);
+$messagingSystem = Workflows\bootstrapEcotone(__DIR__);
 $commandBus = $messagingSystem->getCommandBus();
 $queryBus = $messagingSystem->getQueryBus();
 

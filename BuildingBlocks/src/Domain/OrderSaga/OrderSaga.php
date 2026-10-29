@@ -6,13 +6,14 @@ namespace App\Domain\OrderSaga;
 
 use App\Domain\Order\Event\OrderWasPlaced;
 use App\Domain\OrderSaga\Event\OrderSagaStarted;
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\Delayed;
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\Attribute\Saga;
-use Ecotone\Api\Gateway\CommandBus;
-use Ecotone\Api\Modelling\WithEvents;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\Endpoint\Delayed;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\Saga;
+use Ecotone\Modelling\Attribute\SagaIdentifier;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\WithEvents;
 use Ramsey\Uuid\UuidInterface;
 
 /**
@@ -29,7 +30,7 @@ final class OrderSaga
      * @param UuidInterface[] $productIds
      */
     public function __construct(
-        #[Identifier] private UuidInterface $orderId,
+        #[SagaIdentifier] private UuidInterface $orderId,
         private array $productIds,
         private bool $isSuccessful = false
     ) {

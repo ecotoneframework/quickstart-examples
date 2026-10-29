@@ -6,7 +6,7 @@ namespace App\Testing\Domain\Verification;
 
 use App\Testing\Domain\Verification\Command\StartEmailVerification;
 use App\Testing\Domain\Verification\Command\StartPhoneNumberVerification;
-use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use Psr\Log\LoggerInterface;
 
 final class VerificationSender

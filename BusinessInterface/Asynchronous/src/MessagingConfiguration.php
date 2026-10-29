@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\BusinessInterface;
 
-use Ecotone\Api\Dbal\ExtensionObject\DbalBackedMessageChannelBuilder;
-use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Dbal\DbalBackedMessageChannelBuilder;
+use Ecotone\Messaging\Attribute\ServiceContext;
 
 final readonly class MessagingConfiguration
 {

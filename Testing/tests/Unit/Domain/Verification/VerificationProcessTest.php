@@ -15,14 +15,13 @@ use App\Testing\Domain\Verification\TokenGenerator;
 use App\Testing\Domain\Verification\VerificationProcess;
 use App\Testing\Domain\Verification\VerificationToken;
 use App\Testing\Infrastructure\MessagingConfiguration;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\TestConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\Configuration\InMemoryRepositoryBuilder;
-use Ecotone\Api\Scheduling\TimeSpan;
+use Ecotone\Lite\Test\TestConfiguration;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Test\App\Fixture\StubTokenGenerator;
@@ -47,7 +46,7 @@ final class VerificationProcessTest extends TestCase
             ],
             $this->bootstrapFlowTesting($tokenGenerator)
                 ->publishEvent(new UserWasRegistered($userId, $email, $phoneNumber))
-                ->popRecordedCommands()
+                ->getRecordedCommands()
         );
     }
 
@@ -68,9 +67,8 @@ final class VerificationProcessTest extends TestCase
                 ->sendCommand(new VerifyEmail($userId, VerificationToken::from($emailToken)))
                 ->discardRecordedMessages()
                 ->sendCommand(new VerifyPhoneNumber($userId, VerificationToken::from($phoneNumberToken)))
-                ->advanceTimeBy(TimeSpan::withHours(25))
-                ->run(MessagingConfiguration::ASYNCHRONOUS_MESSAGES)
-                ->popRecordedCommandsWithRouting()
+                ->releaseAwaitingMessagesAndRunConsumer(MessagingConfiguration::ASYNCHRONOUS_MESSAGES, 1000 * 60 * 60 * 24)
+                ->getRecordedCommandsWithRouting()
         );
     }
 
@@ -90,23 +88,25 @@ final class VerificationProcessTest extends TestCase
                 ->publishEvent(new UserWasRegistered($userId, $email, $phoneNumber))
                 ->sendCommand(new VerifyEmail($userId, VerificationToken::from($emailToken)))
                 ->discardRecordedMessages()
-                ->advanceTimeBy(TimeSpan::withHours(25))
-                ->run(MessagingConfiguration::ASYNCHRONOUS_MESSAGES)
-                ->popRecordedCommandsWithRouting()
+                ->releaseAwaitingMessagesAndRunConsumer(MessagingConfiguration::ASYNCHRONOUS_MESSAGES, 1000 * 60 * 60 * 24)
+                ->getRecordedCommandsWithRouting()
         );
     }
 
-    private function bootstrapFlowTesting(StubTokenGenerator $tokenGenerator): \Ecotone\Api\Lite\Test\FlowTestSupport
+    private function bootstrapFlowTesting(StubTokenGenerator $tokenGenerator): \Ecotone\Lite\Test\FlowTestSupport
     {
         return EcotoneLite::bootstrapFlowTesting(
             [VerificationProcess::class],
             [TokenGenerator::class => $tokenGenerator],
-            extensionObjects: [
-                SimpleMessageChannelBuilder::createQueueChannel(MessagingConfiguration::ASYNCHRONOUS_MESSAGES,true),
-                PollingMetadata::create(MessagingConfiguration::ASYNCHRONOUS_MESSAGES)->withTestingSetup(),
-            ],
-            enabledModules: [],
-            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnNotFoundHandler(false),
+            ServiceConfiguration::createWithDefaults()
+                /** We want to enable asynchronous package to test delays */
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel(MessagingConfiguration::ASYNCHRONOUS_MESSAGES, true),
+                    PollingMetadata::create(MessagingConfiguration::ASYNCHRONOUS_MESSAGES)->withTestingSetup(),
+                ]),
+            /** We don't want command bus to fail, when command handler is not found, as we want to assert if commands were sent */
+            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnCommandHandlerNotFound(false)
         );
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Microservices\CustomerService\Infrastructure;
 
-use Ecotone\Api\Amqp\AmqpBackedMessageChannelBuilder;
-use Ecotone\Api\Dbal\ExtensionObject\DbalConfiguration;
-use Ecotone\Api\ExtensionObject\DistributedServiceMap;
-use Ecotone\Api\Dbal\ExtensionObject\DbalBackedMessageChannelBuilder;
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
+use Ecotone\Amqp\Distribution\AmqpDistributedBusConfiguration;
+use Ecotone\Dbal\Configuration\DbalConfiguration;
+use Ecotone\Dbal\DbalBackedMessageChannelBuilder;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class EcotoneConfiguration
 {
@@ -19,8 +19,8 @@ class EcotoneConfiguration
         return [
             DbalBackedMessageChannelBuilder::create(self::ASYNCHRONOUS_CHANNEL),
             PollingMetadata::create(self::ASYNCHRONOUS_CHANNEL)
-                ->withStopOnError(true)
-                ->withExecutionTimeLimitInMilliseconds(1000)
+                ->setStopOnError(true)
+                ->setExecutionTimeLimitInMilliseconds(1000)
         ];
     }
 
@@ -28,16 +28,14 @@ class EcotoneConfiguration
     public function documentStoreRepository()
     {
         return DbalConfiguration::createWithDefaults()
-            ->withDocumentStore(enableDocumentStoreStateStoredRepository: true,);
+            ->withDocumentStore(enableDocumentStoreStandardRepository: true,);
     }
 
     #[ServiceContext]
     public function distributedPublisher()
     {
         return [
-            DistributedServiceMap::initialize()
-                ->withCommandMapping("backoffice_service", "backoffice_service"),
-            AmqpBackedMessageChannelBuilder::create("backoffice_service")
+            AmqpDistributedBusConfiguration::createPublisher()
         ];
     }
 }

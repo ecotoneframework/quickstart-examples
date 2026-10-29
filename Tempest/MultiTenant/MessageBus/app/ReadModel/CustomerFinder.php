@@ -9,8 +9,8 @@ declare(strict_types=1);
 namespace App\ReadModel;
 
 use Doctrine\DBAL\Connection;
-use Ecotone\Api\Dbal\Attribute\MultiTenantConnection;
-use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Dbal\Attribute\MultiTenantConnection;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 final class CustomerFinder
 {

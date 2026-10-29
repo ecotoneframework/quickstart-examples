@@ -14,8 +14,9 @@ use App\Testing\Infrastructure\Converter\EmailConverter;
 use App\Testing\Infrastructure\Converter\PhoneNumberConverter;
 use App\Testing\Infrastructure\Converter\UuidConverter;
 use App\Testing\ReadModel\CurrentBasketProjection;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Dbal\DbalConnectionFactory;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Enqueue\Dbal\DbalConnectionFactory;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
 use Test\App\Fixture\StubTokenGenerator;
@@ -37,10 +38,9 @@ $ecotoneLite = EcotoneLite::bootstrap(
         new UuidConverter(), TokenGenerator::class => new StubTokenGenerator([$emailToken, $phoneNumberToken]),
         new VerificationSender(), DbalConnectionFactory::class => new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone')
     ],
-    namespaces: ['App\\Testing'],
-    pathToRootCatalog: __DIR__,
+    ServiceConfiguration::createWithDefaults()->withLoadCatalog("src"),
+    pathToRootCatalog: __DIR__, // can be ignored, needed for running inside ecotone-dev monorepo
 );
-$ecotoneLite->runConsoleCommand('ecotone:migration:database:setup', ['initialize' => true]);
 
 $commandBus = $ecotoneLite->getCommandBus();
 $queryBus = $ecotoneLite->getQueryBus();

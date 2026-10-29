@@ -1,8 +1,8 @@
 <?php
 
 use App\MultiTenant\Application\Command\RegisterCustomer;
-use Ecotone\Api\Gateway\CommandBus;
-use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\QueryBus;
 use Illuminate\Foundation\Http\Kernel;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Assert;
@@ -10,12 +10,7 @@ use PHPUnit\Framework\Assert;
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . "/../boostrap.php";
 $app = require __DIR__.'/bootstrap/app.php';
-try {
-    $app->make(Kernel::class)->bootstrap();
-} finally {
-    /** Laravel's exception handler renders an error and lets the script exit 0; PHP's own handler exits non-zero */
-    restore_exception_handler();
-}
+$app->make(Kernel::class)->bootstrap();
 runMigrationForTenants(DB::connection('tenant_a_connection'), DB::connection('tenant_b_connection'));
 
 /** @var CommandBus $commandBus */

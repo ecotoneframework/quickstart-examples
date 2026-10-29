@@ -2,10 +2,10 @@
 
 namespace App\OutboxPattern\Domain;
 
-use Ecotone\Api\Attribute\Aggregate;
-use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\EventBus;
 
 #[Aggregate]
 final class Order

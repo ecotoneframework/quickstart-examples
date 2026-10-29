@@ -1,7 +1,6 @@
 <?php
 
 use Doctrine\DBAL\Connection;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Dbal\MultiTenant\MultiTenantConnectionFactory;
 use \Symfony\Component\HttpKernel\Kernel;
 
@@ -19,9 +18,6 @@ function runMigrationForTenants(Kernel $kernel): void
 
     migrate($connectionTenantA);
     migrate($connectionTenantB);
-
-    /** Creates Ecotone's own tables in the database of every tenant */
-    $kernel->getContainer()->get(ConfiguredMessagingSystem::class)->runConsoleCommand('ecotone:migration:database:setup', ['initialize' => true]);
 }
 
 function migrate(Connection $connection): void

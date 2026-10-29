@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\MultiTenant\Configuration;
 
-use Ecotone\Api\Dbal\ExtensionObject\DbalConfiguration;
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\Dbal\ExtensionObject\MultiTenantConfiguration;
+use Ecotone\Dbal\Configuration\DbalConfiguration;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Dbal\MultiTenant\MultiTenantConfiguration;
 
 final readonly class EcotoneConfiguration
 {
@@ -26,7 +26,7 @@ final readonly class EcotoneConfiguration
     public function getDbalConfiguration(): DbalConfiguration
     {
         return DbalConfiguration::createWithDefaults()
-                    ->withDocumentStore(enableDocumentStoreStateStoredRepository: true);
+                    ->withDocumentStore(enableDocumentStoreStandardRepository: true);
     }
 
 }

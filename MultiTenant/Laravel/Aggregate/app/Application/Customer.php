@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\MultiTenant\Application;
 
 use App\MultiTenant\Application\Command\RegisterCustomer;
-use Ecotone\Api\Attribute\Aggregate;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\IdentifierMethod;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use Illuminate\Database\Eloquent\Model;
 
 #[Aggregate]
@@ -32,7 +32,7 @@ class Customer extends Model
         return $this->name;
     }
 
-    #[IdentifierMethod('customer_id')]
+    #[AggregateIdentifierMethod('customer_id')]
     public function getCustomerId(): int
     {
         return $this->customer_id;

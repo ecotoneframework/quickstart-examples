@@ -5,21 +5,13 @@ use App\WorkingWithAggregateDirectly\Command\RegisterProduct;
 use App\WorkingWithAggregateDirectly\Product;
 use App\WorkingWithAggregateDirectly\ProductRepository;
 use App\WorkingWithAggregateDirectly\ProductService;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Dbal\DbalConnectionFactory;
+use Ecotone\Lite\EcotoneLiteApplication;
+use Enqueue\Dbal\DbalConnectionFactory;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
 
 require __DIR__ . "/vendor/autoload.php";
-$messagingSystem = EcotoneLite::bootstrap(
-    containerOrAvailableServices: [
-        DbalConnectionFactory::class => new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone'),
-    ],
-    pathToRootCatalog: __DIR__,
-    namespaces: ['App'],
-);
-$messagingSystem->runConsoleCommand('ecotone:migration:database:setup', ['initialize' => true]);
+$messagingSystem = EcotoneLiteApplication::boostrap([DbalConnectionFactory::class => new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone')], pathToRootCatalog: __DIR__);
 
 echo "Running example!\n";
 

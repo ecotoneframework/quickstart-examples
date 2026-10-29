@@ -13,13 +13,14 @@
         }
     },
     "require": {
-        "ecotone/dbal": "~2.0.0-beta.7",
-        "ecotone/jms-converter": "~2.0.0-beta.7",
-        "ecotone/laravel": "~2.0.0-beta.7",
-        "laravel/laravel": "^11.0"
+        "ecotone/dbal": "~1.328.3",
+        "ecotone/jms-converter": "~1.328.3",
+        "ecotone/laravel": "~1.328.3",
+        "ecotone/laravel-starter": "^1.1.0",
+        "laravel/laravel": "^10.0"
     },
     "require-dev": {
-        "doctrine/orm": "^3.0",
+        "doctrine/orm": "^2.11|^3.0",
         "phpunit/phpunit": "^9.6|^10.5|^11.0"
     },
     "config": {

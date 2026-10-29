@@ -8,9 +8,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
-use Ecotone\Api\Dbal\DbalConnectionFactory;
-use Ecotone\Enqueue\ConnectionFactory;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Enqueue\Dbal\DbalConnectionFactory;
+use Interop\Queue\ConnectionFactory;
 use Tempest\Container\Container;
 use Tempest\Container\Initializer;
 use Tempest\Container\Singleton;

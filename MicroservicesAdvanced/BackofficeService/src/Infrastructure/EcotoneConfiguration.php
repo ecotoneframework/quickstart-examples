@@ -2,9 +2,10 @@
 
 namespace App\Microservices\BackofficeService\Infrastructure;
 
-use Ecotone\Api\Amqp\AmqpBackedMessageChannelBuilder;
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Amqp\Distribution\AmqpDistributedBusConfiguration;
+use Ecotone\Dbal\Configuration\DbalConfiguration;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class EcotoneConfiguration
 {
@@ -12,10 +13,10 @@ class EcotoneConfiguration
     public function distributedConsumer()
     {
         return [
-            AmqpBackedMessageChannelBuilder::create("backoffice_service"),
+            AmqpDistributedBusConfiguration::createConsumer(),
             PollingMetadata::create("backoffice_service")
-                ->withStopOnError(true)
-                ->withExecutionTimeLimitInMilliseconds(1000)
+                ->setStopOnError(true)
+                ->setExecutionTimeLimitInMilliseconds(1000)
         ];
     }
 }

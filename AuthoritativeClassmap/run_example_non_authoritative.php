@@ -1,15 +1,20 @@
 <?php
 
 use App\Domain\Event\CustomerRegistered;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Lite\EcotoneLiteApplication;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 
 echo "Running example with non authoritative classmap (--no-dev)\n";
 exec("composer update --ignore-platform-reqs --no-dev");
 
 require __DIR__ . "/vendor/autoload.php";
 try {
-    $messagingSystem = EcotoneLite::bootstrap(pathToRootCatalog: __DIR__, namespaces: ["App"]);
+    $messagingSystem = EcotoneLiteApplication::bootstrap(
+        pathToRootCatalog: __DIR__,
+        serviceConfiguration: ServiceConfiguration::createWithDefaults()
+            ->doNotLoadCatalog()
+            ->withNamespaces(["App"]),
+    );
 
     throw new Exception("ERROR: Expected an error to be thrown !");
 } catch (Error $e) {

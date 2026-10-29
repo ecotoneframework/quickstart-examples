@@ -9,16 +9,13 @@ use App\Testing\Domain\ShoppingBasket\Basket;
 use App\Testing\Domain\ShoppingBasket\Event\OrderWasPlaced;
 use App\Testing\Domain\ShoppingBasket\Event\ProductWasAddedToBasket;
 use App\Testing\Domain\ShoppingBasket\Event\ProductWasRemovedFromBasket;
-use Ecotone\Api\Projecting\Projection;
-use Ecotone\Api\Projecting\FromAggregateStream;
-use Ecotone\Api\Gateway\DocumentStore;
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\EventSourcing\Attribute\Projection;
+use Ecotone\Messaging\Store\Document\DocumentStore;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use Ramsey\Uuid\UuidInterface;
 
-#[Projection("current_basket")]
-#[FromAggregateStream(Basket::class)]
-#[FromAggregateStream(Product::class)]
+#[Projection("current_basket", [Basket::class, Product::class])]
 final class CurrentBasketProjection
 {
     private const BASKET_COLLECTION = "current_basket";
@@ -44,8 +41,7 @@ final class CurrentBasketProjection
         $documentStore->upsertDocument(
             self::BASKET_COLLECTION,
             $event->getUserId()->toString(),
-            $basket,
-            DocumentStore::LAST_WRITE_WINS
+            $basket
         );
     }
 
@@ -56,12 +52,12 @@ final class CurrentBasketProjection
 
         unset($basket[$event->getProductId()->toString()]);
 
-        $documentStore->updateDocument(self::BASKET_COLLECTION, $event->getUserId()->toString(), $basket, DocumentStore::LAST_WRITE_WINS);
+        $documentStore->updateDocument(self::BASKET_COLLECTION, $event->getUserId()->toString(), $basket);
     }
 
     #[EventHandler]
     public function whenOrderWasPlaced(OrderWasPlaced $event, DocumentStore $documentStore): void
     {
-        $documentStore->updateDocument(self::BASKET_COLLECTION, $event->getUserId()->toString(), [], DocumentStore::LAST_WRITE_WINS);
+        $documentStore->updateDocument(self::BASKET_COLLECTION, $event->getUserId()->toString(), []);
     }
 }

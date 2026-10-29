@@ -8,8 +8,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\Tempest\TempestConnectionReference;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Tempest\Config\TempestConnectionReference;
 
 final readonly class EcotoneConfiguration
 {

@@ -1,6 +1,6 @@
 <?php
 
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,9 +13,12 @@ $stageToRun = $argv[1];
 $userId = Uuid::uuid4();
 $tableProductId = Uuid::uuid4();
 
-[$messagingSystem, $orderController] = getConfiguredMessagingSystem($stageToRun, $userId, $tableProductId);
+$messagingSystem = getConfiguredMessagingSystem($stageToRun, $userId, $tableProductId);
 
 /** Run Controller  */
+
+/** @var \App\ReactiveSystem\OrderController $controller */
+$orderController = $messagingSystem->getServiceFromContainer(sprintf("App\ReactiveSystem\%s\UI\OrderController", $stageToRun));
 
 $orderId = Uuid::uuid4()->toString();
 
@@ -31,5 +34,5 @@ $orderController->placeOrder(new Request(content: json_encode([
 ])));
 
 if ($stageToRun !== 'Stage_1') {
-    $messagingSystem->run("asynchronous", ExecutionPollingMetadata::createWithDefaults()->withTestingSetup(handledMessageLimit: 2, executionTimeLimitInMilliseconds: 60000));
+    $messagingSystem->run("asynchronous", ExecutionPollingMetadata::createWithDefaults()->withTestingSetup(amountOfMessagesToHandle: 2, maxExecutionTimeInMilliseconds: 60000));
 }

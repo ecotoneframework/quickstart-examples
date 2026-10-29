@@ -9,12 +9,12 @@ use App\Workflow\Saga\Application\Order\OrderService;
 use App\Workflow\Saga\Application\OrderProcess\Event\OrderProcessWasStarted;
 use App\Workflow\Saga\Application\OrderProcess\OrderProcess;
 use App\Workflow\Saga\Application\OrderProcess\OrderProcessStatus;
-use App\Workflow\Saga\Application\Payment\PaymentProcessor;
 use App\Workflow\Saga\Application\Payment\PaymentService;
+use App\Workflow\Saga\Application\Payment\PaymentProcessor;
 use App\Workflow\Saga\Infrastructure\StubOrderService;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Scheduling\TimeSpan;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 use Money\Money;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +29,7 @@ final class OrderProcessTest extends TestCase
             [
                 OrderService::class => new StubOrderService($totalPrice)
             ],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async_saga')],
+            enableAsynchronousProcessing: [SimpleMessageChannelBuilder::createQueueChannel('async')]
         );
 
         $ecotoneLite->publishEvent(new OrderWasPlaced($orderId));
@@ -42,7 +42,7 @@ final class OrderProcessTest extends TestCase
 
         $this->assertEquals(
             new OrderProcessWasStarted($orderId),
-            $ecotoneLite->popRecordedEvents()[1]
+            $ecotoneLite->getRecordedEvents()[1]
         );
     }
 
@@ -56,14 +56,14 @@ final class OrderProcessTest extends TestCase
                 OrderService::class => new StubOrderService($totalPrice),
                 PaymentService::class => new PaymentService(new PaymentProcessor())
             ],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async_saga')],
+            enableAsynchronousProcessing: [SimpleMessageChannelBuilder::createQueueChannel('async')]
         );
 
         $this->assertEquals(
             OrderProcessStatus::READY_TO_BE_SHIPPED,
             $ecotoneLite
                 ->publishEvent(new OrderWasPlaced($orderId))
-                ->run('async_saga')
+                ->run('async')
                 ->sendQueryWithRouting('orderProcess.getStatus', metadata: ['aggregate.id' => $orderId])
         );
     }
@@ -78,16 +78,17 @@ final class OrderProcessTest extends TestCase
                 OrderService::class => new StubOrderService($totalPrice),
                 PaymentService::class => new PaymentService(new PaymentProcessor(successAfterAttempt: 3))
             ],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async_saga',delayable:true)],
+            enableAsynchronousProcessing: [
+                // Make Message Channel aware of the delay
+                SimpleMessageChannelBuilder::createQueueChannel('async', delayable: true)
+            ]
         );
 
         $this->assertEquals(
             OrderProcessStatus::CANCELLED,
             $ecotoneLite
                 ->publishEvent(new OrderWasPlaced($orderId))
-                ->run('async_saga')
-                ->advanceTimeBy(new TimeSpan(hours: 1, minutes: 1))
-                ->run('async_saga')
+                ->releaseAwaitingMessagesAndRunConsumer('async', new TimeSpan(hours: 1))
                 ->sendQueryWithRouting('orderProcess.getStatus', metadata: ['aggregate.id' => $orderId])
         );
     }

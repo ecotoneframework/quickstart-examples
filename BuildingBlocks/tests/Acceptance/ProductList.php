@@ -5,18 +5,16 @@ declare(strict_types=1);
 namespace Acceptance;
 
 use App\Domain\Product\Command\CreateProduct;
+use App\Domain\Product\Event\ProductWasAdded;
 use App\Domain\Product\Product;
 use App\Infrastructure\Converter\UuidConverter;
 use App\ReadModel\UnapprovedProductList;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
 use Money\Money;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @internal
- */
 final class ProductList extends TestCase
 {
     #[Test]
@@ -31,10 +29,10 @@ final class ProductList extends TestCase
                 [
                     'productId' => $productId,
                     'name' => $productName,
-                    'price' => $productPrice,
-                ],
+                    'price' => $productPrice
+                ]
             ],
-            EcotoneLite::bootstrapFlowTesting([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
+            EcotoneLite::bootstrapFlowTestingWithEventStore([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
                 ->sendCommand(new CreateProduct(
                     Uuid::fromString($productId),
                     $productName,

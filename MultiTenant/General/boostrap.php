@@ -3,24 +3,24 @@
 use Doctrine\DBAL\Connection;
 use Ecotone\Dbal\EcotoneManagerRegistryConnectionFactory;
 use Ecotone\Dbal\ManagerRegistryEmulator;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Lite\EcotoneLiteApplication;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\EchoLogger;
 
 /** Setup */
-function bootstrapEcotone(string $rootDirectory, array $services = []): ConfiguredMessagingSystem
+function bootstrapEcotone(string $rootDirectory): ConfiguredMessagingSystem
 {
-    return EcotoneLite::bootstrap(
-        containerOrAvailableServices: array_merge([
+    return EcotoneLiteApplication::bootstrap(
+        /**
+         * In your application you will register Services inside your Dependency Container
+         */
+        objectsToRegister: [
             'logger' => new EchoLogger(),
             // Registering connection for tenants. Look src/Configuration/EcotoneConfiguration.php for usage based on tenant header
             'tenant_a_factory' => getTenantAConnection(),
             'tenant_b_factory' => getTenantBConnection(),
-        ], $services),
-        pathToRootCatalog: $rootDirectory,
-        licenceKey: getenv('ECOTONE_LICENSE_KEY') ?: null,
-        namespaces: ['App'],
+        ],
+        pathToRootCatalog: $rootDirectory
     );
 }
 
@@ -43,13 +43,10 @@ function getConnectionFactory(string $dsn): EcotoneManagerRegistryConnectionFact
     return ManagerRegistryEmulator::fromDsnAndConfig($dsn, [__DIR__ . '/src/Domain']);
 }
 
-function runMigrationForTenants(ConfiguredMessagingSystem $messagingSystem): void
+function runMigrationForTenants(): void
 {
     migrate(getTenantAConnection()->getConnection());
     migrate(getTenantBConnection()->getConnection());
-
-    /** Creates Ecotone's own tables in the database of every tenant */
-    $messagingSystem->runConsoleCommand('ecotone:migration:database:setup', ['initialize' => true]);
 }
 
 function migrate(Connection $connection): void
@@ -68,5 +65,7 @@ SQL);
 
 function checkIfTableExists(Connection $connection, string $table): bool
 {
-    return $connection->createSchemaManager()->tableExists($table);
+    $schemaManager = method_exists($connection, 'getSchemaManager') ? $connection->getSchemaManager() : $connection->createSchemaManager();
+
+    return $schemaManager->tablesExist([$table]);
 }

@@ -1,18 +1,18 @@
 <?php
 
 use App\Domain\Event\CustomerRegistered;
-use App\Tests\ClassExcludedFromClassmapWithAttribute;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Lite\EcotoneLiteApplication;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 
 echo "Running example with non authoritative classmap and dev dependencies\n";
 exec("composer update --ignore-platform-reqs");
 
 require __DIR__ . "/vendor/autoload.php";
-$messagingSystem = EcotoneLite::bootstrap(
-    containerOrAvailableServices: [new ClassExcludedFromClassmapWithAttribute()],
+$messagingSystem = EcotoneLiteApplication::bootstrap(
     pathToRootCatalog: __DIR__,
-    namespaces: ["App"],
+    serviceConfiguration: ServiceConfiguration::createWithDefaults()
+        ->doNotLoadCatalog()
+        ->withNamespaces(["App"]),
 );
 
 $messagingSystem->getEventBus()->publish(new CustomerRegistered(1));

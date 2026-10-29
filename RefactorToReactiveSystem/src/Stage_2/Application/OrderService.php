@@ -9,21 +9,21 @@ use App\ReactiveSystem\Stage_2\Domain\Order\Event\OrderWasPlaced;
 use App\ReactiveSystem\Stage_2\Domain\Order\Order;
 use App\ReactiveSystem\Stage_2\Domain\Order\OrderRepository;
 use App\ReactiveSystem\Stage_2\Domain\Product\ProductRepository;
-use Ecotone\Api\Attribute\Deduplicated;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Messaging\Attribute\Deduplicated;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\EventBus;
 use Ramsey\Uuid\UuidInterface;
 
 final class OrderService
 {
     public function __construct(
         private OrderRepository $orderRepository, private ProductRepository $productRepository,
-        private Clock           $clock
+        private Clock           $clock, private EventBus $eventBus
     ) {}
 
     #[Deduplicated("orderId")]
     #[CommandHandler]
-    public function placeOrder(PlaceOrder $command, EventBus $eventBus): void
+    public function placeOrder(PlaceOrder $command): void
     {
         $productDetails = $this->productRepository->getBy($command->productId)->getProductDetails();
 
@@ -35,6 +35,6 @@ final class OrderService
         $this->orderRepository->save($order);
 
         /** Publish event indicating that Order Was Placed */
-        $eventBus->publish(new OrderWasPlaced($order->getOrderId()));
+        $this->eventBus->publish(new OrderWasPlaced($order->getOrderId()));
     }
 }

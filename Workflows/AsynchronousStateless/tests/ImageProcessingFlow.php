@@ -8,8 +8,8 @@ use App\Workflow\Application\ImageProcessingWorkflow;
 use App\Workflow\Application\ImageResizer;
 use App\Workflow\Application\ImageUploader;
 use App\Workflow\Application\ProcessImage;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use PHPUnit\Framework\TestCase;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
@@ -22,13 +22,17 @@ final class ImageProcessingFlow extends TestCase
         @unlink($file);
 
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            /** Testing only the Message Handlers registered in given classes */
             [ImageProcessingWorkflow::class],
+            /** We could provide some Stub implementations */
             [
                 ImageProcessingWorkflow::class => new ImageProcessingWorkflow(),
                 ImageResizer::class => new ImageResizer(new ImageManager(new Driver())),
                 ImageUploader::class => new ImageUploader()
             ],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async')
+            ]
         );
 
         $ecotoneLite

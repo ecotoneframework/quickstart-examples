@@ -2,9 +2,9 @@
 
 namespace App\Asynchronous;
 
-use Ecotone\Api\Amqp\AmqpBackedMessageChannelBuilder;
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class Configuration
 {
@@ -18,7 +18,7 @@ class Configuration
     public function consumerDefinition()
     {
         return PollingMetadata::create(NotificationService::ASYNCHRONOUS_MESSAGES)
-                    ->withHandledMessageLimit(1)
-                    ->withExecutionAmountLimit(1000);
+                    ->setHandledMessageLimit(1)
+                    ->setExecutionAmountLimit(1000);
     }
 }

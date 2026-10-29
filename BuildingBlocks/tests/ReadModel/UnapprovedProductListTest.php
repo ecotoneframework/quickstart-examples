@@ -9,21 +9,19 @@ use App\Domain\Product\Event\ProductWasApproved;
 use App\Domain\Product\Product;
 use App\Infrastructure\Converter\UuidConverter;
 use App\ReadModel\UnapprovedProductList;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
 use Money\Money;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @internal
- */
 final class UnapprovedProductListTest extends TestCase
 {
     public function test_list_unapproved_products_when_there_is_none()
     {
         $this->assertEquals(
             [],
-            EcotoneLite::bootstrapFlowTesting([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
+            EcotoneLite::bootstrapFlowTestingWithEventStore([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
                 ->sendQueryWithRouting('getUnapprovedProducts')
         );
     }
@@ -41,10 +39,10 @@ final class UnapprovedProductListTest extends TestCase
                 [
                     'productId' => $productId,
                     'name' => $productName,
-                    'price' => $productPrice,
-                ],
+                    'price' => $productPrice
+                ]
             ],
-            EcotoneLite::bootstrapFlowTesting([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
+            EcotoneLite::bootstrapFlowTestingWithEventStore([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
                 ->withEventsFor($productId, Product::class, [$productWasAdded])
                 ->publishEvent($productWasAdded)
                 ->sendQueryWithRouting('getUnapprovedProducts')
@@ -59,10 +57,10 @@ final class UnapprovedProductListTest extends TestCase
 
         $this->assertEquals(
             [],
-            EcotoneLite::bootstrapFlowTesting([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
+            EcotoneLite::bootstrapFlowTestingWithEventStore([UnapprovedProductList::class, Product::class, UuidConverter::class], [new UnapprovedProductList(), new UuidConverter()])
                 ->withEventsFor($productId, Product::class, [
                     new ProductWasAdded(Uuid::fromString($productId), $productName, Money::EUR($productPrice)),
-                    new ProductWasApproved(Uuid::fromString($productId)),
+                    new ProductWasApproved(Uuid::fromString($productId))
                 ])
                 ->sendQueryWithRouting('getUnapprovedProducts')
         );

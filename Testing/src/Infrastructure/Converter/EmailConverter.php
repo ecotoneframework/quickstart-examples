@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Testing\Infrastructure\Converter;
 
 use App\Testing\Domain\User\Email;
-use Ecotone\Api\Attribute\Converter;
+use Ecotone\Messaging\Attribute\Converter;
 
 final class EmailConverter
 {

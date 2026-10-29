@@ -3,14 +3,11 @@
 use App\Microservices\BackofficeService\ReadModel\TicketsProjection;
 use App\Microservices\CustomerService\Domain\Issue;
 use App\Microservices\CustomerService\Domain\IssueRepository;
-use App\Microservices\CustomerService\Domain\IssueSubscriber;
-use App\Microservices\CustomerService\Infrastructure\EmailConverter;
-use App\Microservices\CustomerService\Infrastructure\UuidConverter;
 use App\Microservices\CustomerService\Infrastructure\EcotoneConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Amqp\AmqpExtConnectionFactory as AmqpConnectionFactory;
-use Ecotone\Api\Dbal\DbalConnectionFactory;
+use Ecotone\Lite\EcotoneLiteApplication;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Enqueue\AmqpExt\AmqpConnectionFactory;
+use Enqueue\Dbal\DbalConnectionFactory;
 use PHPUnit\Framework\Assert;
 use Ramsey\Uuid\Uuid;
 
@@ -19,31 +16,22 @@ require __DIR__ . "/vendor/autoload.php";
 const BACKOFFICE_SERVICE = "backoffice_service";
 const CUSTOMER_SERVICE = "customer_service";
 
-$customerService = EcotoneLite::bootstrap(
-    containerOrAvailableServices: [
-        new IssueSubscriber(),
-        new EmailConverter(),
-        new UuidConverter(),
-        AmqpConnectionFactory::class => new AmqpConnectionFactory(['dsn' => getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : "amqp://guest:guest@localhost:5672/%2f"]),
-        DbalConnectionFactory::class => new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone'),
-    ],
-    extensionObjects: [ServiceConfiguration::createWithDefaults()->withServiceName(CUSTOMER_SERVICE)],
-    pathToRootCatalog: __DIR__,
-    licenceKey: getenv('ECOTONE_LICENSE_KEY') ?: null,
-    namespaces: ["App\Microservices\CustomerService"],
+$customerService = EcotoneLiteApplication::boostrap(
+    [Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory(['dsn' => getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : "amqp://guest:guest@localhost:5672/%2f"]), DbalConnectionFactory::class => new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone')],
+    serviceConfiguration: ServiceConfiguration::createWithDefaults()
+        ->withServiceName(CUSTOMER_SERVICE)
+        ->withNamespaces(["App\Microservices\CustomerService"])
+        ->doNotLoadCatalog(),
+    pathToRootCatalog: __DIR__
 );
 
-$backofficeConnectionFactory = new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone');
-$backofficeService = EcotoneLite::bootstrap(
-    containerOrAvailableServices: [
-        new TicketsProjection($backofficeConnectionFactory),
-        AmqpConnectionFactory::class => new AmqpConnectionFactory(['dsn' => getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : "amqp://guest:guest@localhost:5672/%2f"]),
-        DbalConnectionFactory::class => $backofficeConnectionFactory,
-    ],
-    extensionObjects: [ServiceConfiguration::createWithDefaults()->withServiceName(BACKOFFICE_SERVICE)],
-    pathToRootCatalog: __DIR__,
-    licenceKey: getenv('ECOTONE_LICENSE_KEY') ?: null,
-    namespaces: ["App\Microservices\BackofficeService"],
+$backofficeService = EcotoneLiteApplication::boostrap(
+    [Enqueue\AmqpExt\AmqpConnectionFactory::class => new AmqpConnectionFactory(['dsn' => getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : "amqp://guest:guest@localhost:5672/%2f"]), DbalConnectionFactory::class => new DbalConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone')],
+    serviceConfiguration: ServiceConfiguration::createWithDefaults()
+        ->withServiceName(BACKOFFICE_SERVICE)
+        ->withNamespaces(["App\Microservices\BackofficeService"])
+        ->doNotLoadCatalog(),
+    pathToRootCatalog: __DIR__
 );
 /** Running consumer for first time in order to create the queue */
 $backofficeService->run(BACKOFFICE_SERVICE);

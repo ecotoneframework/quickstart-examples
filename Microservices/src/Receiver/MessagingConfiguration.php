@@ -2,9 +2,9 @@
 
 namespace App\Microservices\Receiver;
 
-use Ecotone\Api\Amqp\AmqpBackedMessageChannelBuilder;
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Amqp\Distribution\AmqpDistributedBusConfiguration;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class MessagingConfiguration
 {
@@ -14,7 +14,7 @@ class MessagingConfiguration
     public function configure()
     {
         return [
-            AmqpBackedMessageChannelBuilder::create(self::SERVICE_NAME),
+            AmqpDistributedBusConfiguration::createConsumer(),
             PollingMetadata::create(self::SERVICE_NAME)
                 ->withTestingSetup()
         ];

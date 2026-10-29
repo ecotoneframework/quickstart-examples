@@ -1,15 +1,9 @@
 <?php
 
-use App\EventHandling\NotificationService;
 use App\EventHandling\OrderWasPlaced;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLiteApplication;
 
 require __DIR__ . "/vendor/autoload.php";
-$messagingSystem = EcotoneLite::bootstrap(
-    containerOrAvailableServices: [new NotificationService()],
-    pathToRootCatalog: __DIR__,
-    namespaces: ['App'],
-);
+$messagingSystem = EcotoneLiteApplication::boostrap(pathToRootCatalog: __DIR__);
 
 $messagingSystem->getEventBus()->publish(new OrderWasPlaced(1, "Milk"));

@@ -7,11 +7,11 @@ use App\Domain\Command\SubtractMoneyFromWallet;
 use App\Domain\Event\MoneyWasAddedToWallet;
 use App\Domain\Event\MoneyWasSubtractedFromWallet;
 use App\Domain\Event\WalletWasInitialized;
-use Ecotone\Api\Attribute\Apply;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\EventSourcingAggregate;
-use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\Modelling\WithAggregateVersioning;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
+use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
 final class Wallet
@@ -45,7 +45,7 @@ final class Wallet
         return [new MoneyWasSubtractedFromWallet($command->walletId, $command->amount)];
     }
 
-    #[Apply]
+    #[EventSourcingHandler]
     public function applyWalletWasInitialized(WalletWasInitialized $event): void
     {
         $this->walletId = $event->walletId;

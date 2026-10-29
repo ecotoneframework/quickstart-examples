@@ -6,28 +6,29 @@ namespace Workflows {
     use Doctrine\DBAL\Connection;
     use Ecotone\Dbal\EcotoneManagerRegistryConnectionFactory;
     use Ecotone\Dbal\ManagerRegistryEmulator;
-    use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-    use Ecotone\Api\Lite\EcotoneLite;
-    use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+    use Ecotone\Lite\EcotoneLiteApplication;
+    use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
     use Ecotone\Messaging\Handler\Logger\EchoLogger;
     use Ecotone\Dbal\DbalConnection;
-    use Ecotone\Api\Dbal\DbalConnectionFactory;
+    use Enqueue\Dbal\DbalConnectionFactory;
+    use Intervention\Image\Drivers\Gd\Driver;
+    use Intervention\Image\ImageManager;
 
     /** Setup */
     function bootstrapEcotone(string $rootDirectory, array $services = []): ConfiguredMessagingSystem
     {
-        $messagingSystem = EcotoneLite::bootstrap(
-            containerOrAvailableServices: array_merge([
+        return EcotoneLiteApplication::bootstrap(
+        /**
+         * In your application you will register Services inside your Dependency Container
+         */
+            objectsToRegister: [
                 'logger' => new EchoLogger(),
                 // Registering connection for tenants. Look src/Configuration/EcotoneConfiguration.php for usage based on tenant header
                 DbalConnectionFactory::class => getConnectionFactory(getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : 'pgsql://ecotone:secret@localhost:5432/ecotone'),
-            ], $services),
-            pathToRootCatalog: $rootDirectory,
-            namespaces: ['App'],
+                ImageManager::class => new ImageManager(new Driver()),
+            ],
+            pathToRootCatalog: $rootDirectory
         );
-        $messagingSystem->runConsoleCommand('ecotone:migration:database:setup', ['initialize' => true]);
-
-        return $messagingSystem;
     }
 
     function getConnectionFactory(string $dsn): DbalConnectionFactory

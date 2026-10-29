@@ -2,8 +2,8 @@
 
 namespace App\Conversion\Configuration;
 
-use Ecotone\Api\JMSConverter\JMSConverterConfiguration;
-use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\JMSConverter\JMSConverterConfiguration;
+use Ecotone\Messaging\Attribute\ServiceContext;
 
 class Configuration
 {

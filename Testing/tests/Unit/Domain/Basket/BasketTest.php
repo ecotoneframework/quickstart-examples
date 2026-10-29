@@ -12,14 +12,11 @@ use App\Testing\Domain\ShoppingBasket\Event\ProductWasAddedToBasket;
 use App\Testing\Domain\ShoppingBasket\Event\ProductWasRemovedFromBasket;
 use App\Testing\Domain\ShoppingBasket\ProductService;
 use App\Testing\Infrastructure\Converter\UuidConverter;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Test\App\Fixture\StubProductService;
 
-/**
- * @internal
- */
 final class BasketTest extends TestCase
 {
     public function test_adding_product_to_basket()
@@ -33,7 +30,7 @@ final class BasketTest extends TestCase
             [new ProductWasAddedToBasket($userId, $productId, 500)],
             EcotoneLite::bootstrapFlowTesting([Basket::class], [ProductService::class => $productService])
                 ->sendCommand(new AddProductToBasket($userId, $productId))
-                ->popRecordedEvents()
+                ->getRecordedEvents()
         );
     }
 
@@ -49,7 +46,7 @@ final class BasketTest extends TestCase
                 ->sendCommand(new AddProductToBasket($userId, $productId))
                 ->discardRecordedMessages()
                 ->sendCommand(new AddProductToBasket($userId, $productId))
-                ->popRecordedEvents()
+                ->getRecordedEvents()
         );
     }
 
@@ -65,7 +62,7 @@ final class BasketTest extends TestCase
                 ->sendCommand(new AddProductToBasket($userId, $productId))
                 ->discardRecordedMessages()
                 ->sendCommand(new RemoveProductFromBasket($userId, $productId))
-                ->popRecordedEvents()
+                ->getRecordedEvents()
         );
     }
 
@@ -74,7 +71,7 @@ final class BasketTest extends TestCase
         /**
          * When using Flow Testing with Event Store, we need to provide Converters for the events.
          */
-        $testSupport = EcotoneLite::bootstrapFlowTesting(
+        $testSupport = EcotoneLite::bootstrapFlowTestingWithEventStore(
             [Basket::class, BasketRepository::class, UuidConverter::class],
             [new UuidConverter()],
             pathToRootCatalog: __DIR__, // can be ignored, needed for running inside ecotone-dev monorepo
@@ -86,7 +83,7 @@ final class BasketTest extends TestCase
 
         $basketRepository = $testSupport->getGateway(BasketRepository::class);
         $basketRepository->save($userId->toString(), 0, [
-            new ProductWasAddedToBasket($userId, $productId, $productPrice),
+            new ProductWasAddedToBasket($userId, $productId, $productPrice)
         ]);
 
         $this->assertEquals(
@@ -94,7 +91,7 @@ final class BasketTest extends TestCase
             $testSupport
                 ->discardRecordedMessages()
                 ->sendCommand(new RemoveProductFromBasket($userId, $productId))
-                ->popRecordedEvents()
+                ->getRecordedEvents()
         );
     }
 
@@ -110,7 +107,7 @@ final class BasketTest extends TestCase
                 ->sendCommand(new AddProductToBasket($userId, $productId))
                 ->discardRecordedMessages()
                 ->sendCommand(new RemoveProductFromBasket($userId, Uuid::uuid4()))
-                ->popRecordedEvents()
+                ->getRecordedEvents()
         );
     }
 }

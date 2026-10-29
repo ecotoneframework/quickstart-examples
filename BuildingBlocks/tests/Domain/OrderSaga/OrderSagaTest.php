@@ -12,13 +12,11 @@ use App\Domain\OrderSaga\ProductReservationService;
 use App\Domain\Product\Command\CreateProduct;
 use App\Domain\Product\Product;
 use App\Domain\Product\ProductService;
-use App\Infrastructure\Converter\UuidConverter;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Money\Money;
 use PHPUnit\Framework\Attributes\Test;
-use Ecotone\Api\Scheduling\Duration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
@@ -31,12 +29,12 @@ final class OrderSagaTest extends TestCase
         $productTableId = Uuid::uuid4();
         $isReservationSuccessful = true;
 
+        /** By default asynchronous code is treated as synchronous */
         $this->assertEquals(
             OrderStatus::COMPLETED,
-            $this->getBootstrapFlowTesting($isReservationSuccessful)
+            EcotoneLite::bootstrapFlowTesting([OrderSaga::class, Order::class, Product::class, ProductService::class], [new ProductReservationService($isReservationSuccessful)])
                 ->sendCommand(new CreateProduct($productTableId, 'Table', Money::EUR(150)))
                 ->sendCommand(new PlaceOrder($orderId, [$productTableId]), metadata: ['executorId' => $customerId])
-                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
                 ->sendQueryWithRouting('order.get_status', metadata: ['aggregate.id' => $orderId])
         );
     }
@@ -54,15 +52,14 @@ final class OrderSagaTest extends TestCase
             $ecotoneLite
                 ->sendCommand(new CreateProduct($productTableId, 'Table', Money::EUR(150)))
                 ->sendCommand(new PlaceOrder($orderId, [$productTableId]), metadata: ['executorId' => $customerId])
-                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
+                ->releaseAwaitingMessagesAndRunConsumer('orders', 0, ExecutionPollingMetadata::createWithTestingSetup())
                 ->sendQueryWithRouting('order.get_status', metadata: ['aggregate.id' => $orderId])
         );
 
         $this->assertEquals(
             OrderStatus::CANCELLED,
             $ecotoneLite
-                ->advanceTimeBy(Duration::minutes(2))
-                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
+                ->releaseAwaitingMessagesAndRunConsumer('orders', 1000 * 60, ExecutionPollingMetadata::createWithTestingSetup())
                 ->sendQueryWithRouting('order.get_status', metadata: ['aggregate.id' => $orderId])
         );
     }
@@ -80,26 +77,27 @@ final class OrderSagaTest extends TestCase
             $ecotoneLite
                 ->sendCommand(new CreateProduct($productTableId, 'Table', Money::EUR(150)))
                 ->sendCommand(new PlaceOrder($orderId, [$productTableId]), metadata: ['executorId' => $customerId])
-                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
+                ->releaseAwaitingMessagesAndRunConsumer('orders', 0, ExecutionPollingMetadata::createWithTestingSetup())
                 ->sendQueryWithRouting('order.get_status', metadata: ['aggregate.id' => $orderId])
         );
 
         $this->assertEquals(
             OrderStatus::COMPLETED,
             $ecotoneLite
-                ->sendCommandWithRouting('allow_product_reservation')
-                ->advanceTimeBy(Duration::minutes(2))
-                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
+                ->sendCommandWithRoutingKey('allow_product_reservation')
+                ->releaseAwaitingMessagesAndRunConsumer('orders', 1000 * 60, ExecutionPollingMetadata::createWithTestingSetup())
                 ->sendQueryWithRouting('order.get_status', metadata: ['aggregate.id' => $orderId])
         );
     }
 
-    private function getBootstrapFlowTesting(bool $isReservationSuccessful): \Ecotone\Api\Lite\Test\FlowTestSupport
+    private function getBootstrapFlowTesting(false $isReservationSuccessful): \Ecotone\Lite\Test\FlowTestSupport
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [OrderSaga::class, Order::class, Product::class, ProductService::class, ProductReservationService::class, UuidConverter::class],
-            [new ProductReservationService($isReservationSuccessful), new UuidConverter()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders',true)],
+            [OrderSaga::class, Order::class, Product::class, ProductService::class, ProductReservationService::class],
+            [new ProductReservationService($isReservationSuccessful)],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', true)
+            ]
         );
         return $ecotoneLite;
     }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Workflow\Application;
 
-use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
 
 final readonly class ImageProcessingWorkflow
 {

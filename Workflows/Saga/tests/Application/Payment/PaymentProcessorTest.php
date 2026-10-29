@@ -9,7 +9,7 @@ use App\Workflow\Saga\Application\Payment\Event\PaymentFailed;
 use App\Workflow\Saga\Application\Payment\Event\PaymentWasSuccessful;
 use App\Workflow\Saga\Application\Payment\PaymentService;
 use App\Workflow\Saga\Application\Payment\PaymentProcessor;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
 use Money\Money;
 use PHPUnit\Framework\TestCase;
 
@@ -27,8 +27,8 @@ final class PaymentProcessorTest extends TestCase
         $this->assertEquals(
             [new PaymentWasSuccessful('123')],
             $ecotoneLite
-                ->sendCommandWithRouting('takePayment', new TakePayment('123', Money::EUR(100)))
-                ->popRecordedEvents(),
+                ->sendCommandWithRoutingKey('takePayment', new TakePayment('123', Money::EUR(100)))
+                ->getRecordedEvents(),
         );
     }
 
@@ -44,8 +44,8 @@ final class PaymentProcessorTest extends TestCase
         $this->assertEquals(
             [new PaymentFailed('123')],
             $ecotoneLite
-                ->sendCommandWithRouting('takePayment', new TakePayment('123', Money::EUR(100)))
-                ->popRecordedEvents(),
+                ->sendCommandWithRoutingKey('takePayment', new TakePayment('123', Money::EUR(100)))
+                ->getRecordedEvents(),
         );
     }
 
@@ -61,10 +61,10 @@ final class PaymentProcessorTest extends TestCase
         $this->assertEquals(
             [new PaymentWasSuccessful('123')],
             $ecotoneLite
-                ->sendCommandWithRouting('takePayment', new TakePayment('123', Money::EUR(100)))
+                ->sendCommandWithRoutingKey('takePayment', new TakePayment('123', Money::EUR(100)))
                 ->discardRecordedMessages()
-                ->sendCommandWithRouting('takePayment', new TakePayment('123', Money::EUR(100)))
-                ->popRecordedEvents(),
+                ->sendCommandWithRoutingKey('takePayment', new TakePayment('123', Money::EUR(100)))
+                ->getRecordedEvents(),
         );
     }
 }

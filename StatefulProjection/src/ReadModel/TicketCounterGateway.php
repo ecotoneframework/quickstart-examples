@@ -4,7 +4,7 @@ namespace App\ReadModel;
 
 use App\ReadModel\TicketCounterProjection\TicketCounterProjection;
 use App\ReadModel\TicketCounterProjection\TicketCounterState;
-use Ecotone\Api\Projecting\ProjectionStateGateway;
+use Ecotone\EventSourcing\Attribute\ProjectionStateGateway;
 
 interface TicketCounterGateway
 {

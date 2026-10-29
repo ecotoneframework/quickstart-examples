@@ -6,8 +6,8 @@ namespace App\WorkingWithAggregateDirectly;
 
 use App\WorkingWithAggregateDirectly\Command\ChangePrice;
 use App\WorkingWithAggregateDirectly\Command\RegisterProduct;
-use Ecotone\Api\Attribute\BusinessMethod;
-use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Messaging\Attribute\BusinessMethod;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
 
 /**
  * Implementation will be auto-generated and this class will be available in your Dependency Container
@@ -21,5 +21,5 @@ interface ProductService
     public function changePrice(ChangePrice $command): void;
 
     #[BusinessMethod(Product::PRODUCT_GET_PRICE_API)]
-    public function getPrice(#[Identifier] $productId): float;
+    public function getPrice(#[AggregateIdentifier] $productId): float;
 }

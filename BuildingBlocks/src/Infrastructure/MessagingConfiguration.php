@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
-use Ecotone\Api\Dbal\ExtensionObject\DbalConfiguration;
-use Ecotone\Api\Dbal\ExtensionObject\DbalBackedMessageChannelBuilder;
-use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Dbal\Configuration\DbalConfiguration;
+use Ecotone\Dbal\DbalBackedMessageChannelBuilder;
+use Ecotone\Messaging\Attribute\ServiceContext;
 
 final class MessagingConfiguration
 {
@@ -16,7 +16,7 @@ final class MessagingConfiguration
         /** This also works for state-stored sagas */
         return DbalConfiguration::createWithDefaults()
             ->withDocumentStore(
-                enableDocumentStoreStateStoredRepository: true,
+                enableDocumentStoreStandardRepository: true,
             );
     }
 

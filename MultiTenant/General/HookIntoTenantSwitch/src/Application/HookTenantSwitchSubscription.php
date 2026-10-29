@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\MultiTenant\Application;
 
-use Ecotone\Api\Dbal\Attribute\OnTenantActivation;
-use Ecotone\Api\Dbal\Attribute\OnTenantDeactivation;
-use Ecotone\Api\Attribute\Header;
-use Ecotone\Api\ExtensionObject\ConnectionReference;
+use Ecotone\Dbal\Attribute\OnTenantActivation;
+use Ecotone\Dbal\Attribute\OnTenantDeactivation;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Config\ConnectionReference;
 
 final readonly class HookTenantSwitchSubscription
 {

@@ -12,15 +12,12 @@ use App\Testing\Infrastructure\Converter\EmailConverter;
 use App\Testing\Infrastructure\Converter\PhoneNumberConverter;
 use App\Testing\Infrastructure\Converter\UuidConverter;
 use App\Testing\ReadModel\CurrentBasketProjection;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 
-/**
- * @internal
- */
 final class CurrentBasketProjectionTest extends TestCase
 {
     public function test_listing_basket_products_for_user()
@@ -36,7 +33,7 @@ final class CurrentBasketProjectionTest extends TestCase
                 ->withEventsFor($userId, Basket::class, [
                     new ProductWasAddedToBasket($userId, $productId, $productPrice),
                 ])
-                ->triggerProjection('current_basket')
+                ->triggerProjection("current_basket")
                 ->sendQueryWithRouting(CurrentBasketProjection::GET_CURRENT_BASKET_QUERY, $userId)
         );
     }
@@ -52,9 +49,9 @@ final class CurrentBasketProjectionTest extends TestCase
             $this->getTestSupport()
                 ->withEventsFor($userId, Basket::class, [
                     new ProductWasAddedToBasket($userId, $productId, $productPrice),
-                    new ProductWasRemovedFromBasket($userId, $productId),
+                    new ProductWasRemovedFromBasket($userId, $productId)
                 ])
-                ->triggerProjection('current_basket')
+                ->triggerProjection("current_basket")
                 ->sendQueryWithRouting(CurrentBasketProjection::GET_CURRENT_BASKET_QUERY, $userId)
         );
     }
@@ -69,13 +66,13 @@ final class CurrentBasketProjectionTest extends TestCase
             [],
             $this->getTestSupport()
                 ->withEventsFor($userId, Basket::class, [
-                    new ProductWasAddedToBasket($userId, $productId, $productPrice),
+                    new ProductWasAddedToBasket($userId, $productId, $productPrice)
                 ])
-                ->triggerProjection('current_basket')
+                ->triggerProjection("current_basket")
                 ->withEventsFor($userId, Basket::class, [
-                    new ProductWasRemovedFromBasket($userId, $productId),
+                    new ProductWasRemovedFromBasket($userId, $productId)
                 ], 1)
-                ->triggerProjection('current_basket')
+                ->triggerProjection("current_basket")
                 ->sendQueryWithRouting(CurrentBasketProjection::GET_CURRENT_BASKET_QUERY, $userId)
         );
     }
@@ -91,20 +88,22 @@ final class CurrentBasketProjectionTest extends TestCase
             $this->getTestSupport()
                 ->withEventsFor($userId, Basket::class, [
                     new ProductWasAddedToBasket($userId, $productId, $productPrice),
-                    new OrderWasPlaced($userId, [$productId]),
+                    new OrderWasPlaced($userId, [$productId])
                 ])
-                ->triggerProjection('current_basket')
+                ->triggerProjection("current_basket")
                 ->sendQueryWithRouting(CurrentBasketProjection::GET_CURRENT_BASKET_QUERY, $userId)
         );
     }
 
     private function getTestSupport(): FlowTestSupport
     {
-        return EcotoneLite::bootstrapFlowTesting(
+        return EcotoneLite::bootstrapFlowTestingWithEventStore(
             [CurrentBasketProjection::class, Basket::class],
             [new CurrentBasketProjection(), new EmailConverter(), new PhoneNumberConverter(), new UuidConverter()],
-            pathToRootCatalog: __DIR__,
-            namespaces: ["App\Testing\Infrastructure\Converter"],
+            configuration: ServiceConfiguration::createWithDefaults()
+                // Loading converters, so they can be used for events
+                ->withNamespaces(["App\Testing\Infrastructure\Converter"]),
+            pathToRootCatalog: __DIR__, // can be ignored, needed for running inside ecotone-dev monorepo
         );
     }
 }
